@@ -59,20 +59,20 @@ def cover_svg():
     for e, x, y, fs in [('🌳', 105, 835, 170), ('🌴', 705, 800, 150), ('🌳', 635, 860, 110), ('🐄', 190, 990, 105), ('🐑', 285, 1040, 80), ('🚜', 650, 975, 105),
                         ('🪨', 95, 1075, 85), ('🌾', 720, 1050, 90), ('🌱', 610, 1075, 70), ('🦋', 165, 700, 58), ('🐝', 590, 705, 50), ('🐦', 290, 610, 52), ('🐦', 340, 585, 38), ('🐟', 505, 985, 42), ('💧', 395, 905, 40)]:
         s += t(x, y, e, fs)
-    # top bar (logo slots)
-    s += '<rect x="30" y="26" width="734" height="92" rx="24" fill="#fff" opacity=".95" stroke="#0b2a6b" stroke-width="3"/>'
-    s += t(397, 66, 'الصف الرابع الابتدائي', 38, '#0b2a6b', True) + t(397, 100, 'الفصل الدراسي الأول', 26, '#1c7ed6', True)
-    lr, ll = _logo('logo_right'), _logo('logo_left')
-    if lr: s += f'<image href="{lr}" x="46" y="34" width="150" height="76" preserveAspectRatio="xMidYMid meet" transform="translate(548 0)"/>'
-    if ll: s += f'<image href="{ll}" x="46" y="34" width="150" height="76" preserveAspectRatio="xMidYMid meet"/>'
+    # top bar: official lockup (right) + grade (left)
+    lk = _logo('lockup')
+    s += '<rect x="30" y="26" width="734" height="112" rx="26" fill="#fff" opacity=".97" stroke="#0a5f6a" stroke-width="3"/>'
+    s += '<line x1="480" y1="46" x2="480" y2="118" stroke="#d4cdc9" stroke-width="2"/>'
+    s += t(255, 76, 'الصف الرابع الابتدائي', 36, '#054473', True) + t(255, 114, 'الفصل الدراسي الأول', 25, '#0a5f6a', True)
+    if lk: s += f'<image href="{lk}" x="498" y="38" width="248" height="88" preserveAspectRatio="xMidYMid meet"/>'
     # ribbon title
-    s += '<path d="M60 250 L110 290 L110 330 L60 330 L90 290Z" fill="#0b2a6b" opacity=".85"/><path d="M734 250 L684 290 L684 330 L734 330 L704 290Z" fill="#0b2a6b" opacity=".85"/>'
-    s += '<rect x="106" y="178" width="586" height="170" rx="40" fill="#0b2a6b" opacity=".25" transform="translate(7 9)"/>'
-    s += '<rect x="106" y="178" width="586" height="170" rx="40" fill="#fff" stroke="#0b2a6b" stroke-width="7"/>'
-    s += '<rect x="122" y="194" width="554" height="138" rx="28" fill="none" stroke="#f0a830" stroke-width="3" stroke-dasharray="3 9" stroke-linecap="round"/>'
-    s += t(397, 298, 'العلوم', 138, '#0b2a6b', True, 'style="paint-order:stroke" stroke="#f0a830" stroke-width="5"')
+    s += '<path d="M60 262 L110 302 L110 342 L60 342 L90 302Z" fill="#054473"/><path d="M734 262 L684 302 L684 342 L734 342 L704 302Z" fill="#054473"/>'
+    s += '<rect x="106" y="190" width="586" height="170" rx="40" fill="#054473" opacity=".25" transform="translate(7 9)"/>'
+    s += '<rect x="106" y="190" width="586" height="170" rx="40" fill="#fff" stroke="#054473" stroke-width="7"/>'
+    s += '<rect x="122" y="206" width="554" height="138" rx="28" fill="none" stroke="#0a5f6a" stroke-width="2.5"/>'
+    s += t(397, 310, 'العلوم', 138, '#054473', True)
     # unit medallions
-    units = [('🌍', ['الإنسان', 'والبيئة'], '#2b8a3e', 600), ('🐝', ['الكائنات', 'الحية'], '#e8590c', 397), ('🌱', ['الأرض والتربة', 'والزراعة'], '#8d5a2b', 194)]
+    units = [('🌍', ['الإنسان', 'والبيئة'], '#0a5f6a', 600), ('🐝', ['الكائنات', 'الحية'], '#054473', 397), ('🌱', ['الأرض والتربة', 'والزراعة'], '#5d656e', 194)]
     for e, lines, c, x in units:
         s += f'<circle cx="{x}" cy="500" r="66" fill="#000" opacity=".12" transform="translate(4 6)"/><circle cx="{x}" cy="500" r="66" fill="#fff" stroke="{c}" stroke-width="8"/>'
         s += t(x, 523, e, 66)
@@ -81,7 +81,9 @@ def cover_svg():
         s += f'<rect x="{x-w/2:.0f}" y="582" width="{w:.0f}" height="{h}" rx="22" fill="{c}"/>'
         for i, l in enumerate(lines):
             s += t(x, 610 + i * 27, l, 21, '#fff', True)
-    # bottom band
-    s += '<rect x="60" y="1056" width="674" height="52" rx="26" fill="#fff" opacity=".95" stroke="#0b2a6b" stroke-width="3"/>'
-    s += t(397, 1090, 'اسم التلميذ: ............................................  الفصل: ..........', 22, '#0b2a6b', True)
+    # bottom band: student name + white emblem
+    em = _logo('emblem-white')
+    s += '<rect x="46" y="1046" width="702" height="62" rx="28" fill="#0a5f6a" stroke="#fff" stroke-width="3"/>'
+    s += t(450, 1086, 'اسم التلميذ: ......................................  الفصل: ..........', 22, '#fff', True)
+    if em: s += f'<image href="{em}" x="70" y="1052" width="76" height="52" preserveAspectRatio="xMidYMid meet"/>'
     return s + '</svg>'

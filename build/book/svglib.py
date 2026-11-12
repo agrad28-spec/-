@@ -17,7 +17,7 @@ def _wrap(w, h, inner, defs=''):
     return f'<svg viewBox="0 0 {w} {h}" xmlns="http://www.w3.org/2000/svg"><defs>{defs}</defs>{inner}</svg>'
 
 # ---------------------------------------------------------------- generic tree
-def tree(root, children, color='#2b8a3e', W=900):
+def tree(root, children, color='#0a5f6a', W=900):
     n = len(children)
     gap = 14
     cw = (W - 24 - (n - 1) * gap) / n
@@ -38,7 +38,7 @@ def tree(root, children, color='#2b8a3e', W=900):
     return _wrap(W, H, s)
 
 # ---------------------------------------------------------------- generic flow (steps go right -> left)
-def flow(steps, W=900, H=210, color='#2b8a3e', arrow='#e8590c'):
+def flow(steps, W=900, H=210, color='#0a5f6a', arrow='#054473'):
     n = len(steps)
     gap = 56
     bw = (W - 20 - (n - 1) * gap) / n

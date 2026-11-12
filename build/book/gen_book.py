@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import sys, os, re, subprocess, json
+import sys, os, re, subprocess, json, base64
 sys.path.insert(0, os.path.dirname(__file__))
 import svglib as S
 import cover as COV
@@ -22,6 +22,43 @@ def shown(items, k=1):
 def perm(n):
     k = 1 if n <= 3 else n // 2
     return [(i + k) % n for i in range(n)]
+
+
+# ------------------------------------------------------------------ brand: icons (from the platform's icon set, 24x24 stroke 1.75) & palette
+ICON_PATHS = {
+  'arrow': "M5 12h14M13 6l6 6-6 6",
+  'book': "M12 6.5C10.5 5 8 4.5 4 4.5v13c4 0 6.5.5 8 2 1.5-1.5 4-2 8-2v-13c-4 0-6.5.5-8 2zM12 6.5v13",
+  'star': "m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z",
+  'edit': "M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4",
+  'check': "M20 6 9 17l-5-5",
+  'sun': "M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41",
+  'alert': "M12 3 2 20h20zM12 10v4M12 17h.01",
+  'globe': "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18M3 12h18M12 3c2.5 2.7 3.5 5.7 3.5 9s-1 6.3-3.5 9c-2.5-2.7-3.5-5.7-3.5-9s1-6.3 3.5-9",
+  'mapPin': "M12 21s-7-6.2-7-11.5a7 7 0 1 1 14 0C19 14.8 12 21 12 21M12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5",
+}
+def ic(name):
+    return ('<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">'
+            f'<path d="{ICON_PATHS[name]}"/></svg>')
+
+EMOJI_ICON = [('🎯', 'arrow'), ('📖', 'book'), ('📚', 'book'), ('⭐', 'star'), ('🧪', 'edit'), ('✅', 'check'), ('💡', 'sun'),
+              ('⚠️', 'alert'), ('🧴', 'alert'), ('🧭', 'globe'), ('🔭', 'globe'), ('📌', 'mapPin')]
+
+def iconify(html):
+    html = re.sub(r'(<div class="tip">)(?:🌱|🌳|💡)\s*', lambda m: m.group(1) + ic('sun') + ' ', html)
+    for e, n in EMOJI_ICON:
+        html = html.replace(e, ic(n))
+    return html
+
+COLOR_MAP = {  # recolor diagrams to the center's palette (teal #0A5F6A, navy #054473, greys); status colors stay for warnings only
+ '#2b8a3e': '#0a5f6a', '#1c7ed6': '#054473', '#e8590c': '#3e8086', '#868e96': '#5d656e', '#c92a2a': '#054473', '#8d5a2b': '#5d656e',
+ '#c08a2b': '#5d656e', '#7048e8': '#054473', '#495057': '#303336', '#0b2a6b': '#054473',
+ '#ebfbee': '#e8f1f2', '#fff4e6': '#f3eeec', '#fff5f5': '#e6eef5', '#e7f5ff': '#e8f1f2', '#fff9db': '#f3eeec', '#fdf0e0': '#f3eeec',
+ '#f1f3f5': '#eeeded', '#f3f0ff': '#e6eef5', '#fafbfc': '#ffffff',
+}
+def brandify(svg):
+    for a, b in COLOR_MAP.items():
+        svg = svg.replace(a, b)
+    return svg
 
 # ------------------------------------------------------------------ question rendering
 def table_classify(cols, rows, student, group=False, multi=False, first='العنصر'):
@@ -212,6 +249,8 @@ def mk_svgs():
     D['SOIL'] = S.soil()
     D['DESERT'] = S.desertification()
     D['DESERTFLOW'] = S.flow([dict(e='🏜️', t='المشكلة', s='التصحّر', c='#c92a2a', f='#fff5f5'), dict(e='💨', t='أسبابه', s='رمال، رياح، جفاف، حرارة', c='#e8590c', f='#fff4e6'), dict(e='🌱', t='وسائل الحدّ منه', s='حلول متعدّدة', c='#2b8a3e', f='#ebfbee')], H=215)
+    for k in ('ENV', 'TREE_WL', 'TREE_LN', 'FOODCHAIN', 'RES', 'VERTTREE', 'PLANTTREE', 'ROCKS1', 'ROCKS2', 'ROCKS3', 'ERODE', 'DESERTFLOW'):
+        D[k] = brandify(D[k])
     return D
 
 # ------------------------------------------------------------------ cards helper (HTML)
@@ -249,7 +288,14 @@ CARDS['SOLUTIONS'] = emoji_cards([
 # ------------------------------------------------------------------ assemble
 def load(name): return open(os.path.join(B, name), encoding='utf-8').read()
 
+def write_footer_svg():
+    b64 = base64.b64encode(open(os.path.join(B, 'assets', 'emblem.png'), 'rb').read()).decode()
+    svg = ('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="52" height="37" viewBox="0 0 52 37">'
+           f'<image width="52" height="37" xlink:href="data:image/png;base64,{b64}"/></svg>')
+    open(os.path.join(B, 'assets', 'footer_emblem.svg'), 'w').write(svg)
+
 def build_book(pages=None):
+    write_footer_svg()
     css = load('book.css')
     body = load('front.html') + load('unit1.html') + load('unit2.html') + load('unit3.html') + load('back.html')
     svgs = mk_svgs()
@@ -263,6 +309,7 @@ def build_book(pages=None):
         body = body.replace('{{REVIEW_%d}}' % u, review_student(RQ[u]))
     body = body.replace('{{FINAL}}', review_student(FINAL))
     body = body.replace('{{GLOSSARY}}', glossary_html())
+    body = iconify(body)
     # page numbers for TOC
     for key in re.findall(r'\{\{PG:(\w+)\}\}', body):
         body = body.replace('{{PG:%s}}' % key, str((pages or {}).get(key, '—')))
