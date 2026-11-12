@@ -91,3 +91,7 @@ td.rt { text-align: right; } tr { page-break-inside: avoid; }
 .review h2 { font-size: 20pt; color: #0b2a6b; border-bottom: 4px solid #f0a830; margin: 6px 0; }
 
 table:not(.gl):not(.toc) { page-break-inside: avoid; break-inside: avoid; }
+
+@page :first { margin: 0; }
+.coverfull { width: 210mm; height: 296.6mm; overflow: hidden; page-break-after: always; margin: 0; padding: 0; }
+.coverfull svg { width: 210mm; height: 296.6mm; display: block; }

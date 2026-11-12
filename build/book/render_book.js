@@ -7,6 +7,6 @@ const out = { book: '/home/user/-/kitab_al_ulum_4_ibtidai.pdf', guide: '/home/us
   await pg.evaluate(() => document.fonts.ready);
   await pg.pdf({ path: out, format: 'A4', printBackground: true, displayHeaderFooter: true, headerTemplate: '<span></span>',
     footerTemplate: '<div style="font-size:10px;width:100%;text-align:center;font-family:LoewNA,FreeSerif"><span dir="ltr"><span class="pageNumber"></span></span></div>',
-    margin: { top: '13mm', bottom: '14mm', left: '14mm', right: '14mm' } });
+    preferCSSPageSize: true });
   await b.close();
 })();

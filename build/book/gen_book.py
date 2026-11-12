@@ -2,6 +2,7 @@
 import sys, os, re, subprocess, json
 sys.path.insert(0, os.path.dirname(__file__))
 import svglib as S
+import cover as COV
 from qdata import L as LQ, R as RQ, FINAL
 
 B = os.path.dirname(os.path.abspath(__file__))
@@ -182,7 +183,7 @@ def glossary_html():
 # ------------------------------------------------------------------ SVG placeholders
 def mk_svgs():
     D = {}
-    D['COVER'] = S.cover()
+    D['COVER'] = COV.cover_svg()
     D['ENV'] = S.env_panorama()
     D['TREE_WL'] = S.tree('البيئة', [('بيئة مائية', '#1c7ed6', '🌊', ['مياه مالحة: البحار', 'مياه عذبة: الأنهار']),
                                     ('بيئة يابسة', '#2b8a3e', '⛰️', ['الصحاري', 'الغابات', 'المزارع'])], '#0b2a6b')
