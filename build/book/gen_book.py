@@ -3,6 +3,7 @@ import sys, os, re, json, base64
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import svglib as S
 import icons as I
+import pics as P
 import cover as COV
 from qdata import L as LQ, R as RQ, FINAL
 
@@ -36,15 +37,15 @@ def arabic_clean(html):
     return re.sub(r'(?<=>)([^<>]+)(?=<)', lambda m: clean_text(m.group(1)), html)
 
 # ------------------------------------------------------------------ icons in text
-ICON_MAP = {'🎯': 'target', '📖': 'book-open', '📚': 'library', '⭐': 'list-checks', '🧪': 'pencil', '✅': 'circle-check', '💡': 'lightbulb',
+ICON_MAP_OLD = {'🎯': 'target', '📖': 'book-open', '📚': 'library', '⭐': 'list-checks', '🧪': 'pencil', '✅': 'circle-check', '💡': 'lightbulb',
             '⚠️': 'triangle-alert', '🧴': 'triangle-alert', '🧭': 'compass', '🔭': 'compass', '📌': 'map-pin',
             '🦴': 'bone', '🐛': 'bug', '💧': 'droplets', '🌬️': 'wind', '⛰️': 'mountain'}
 EMOJI_RE = re.compile('[\U0001F000-\U0001FAFF\u2600-\u2712\u2715-\u27BF\u2B00-\u2BFF\uFE0F\u200D\u2705]+')   # keeps U+2713/2714 (check mark)
 
 def iconify(html):
-    html = re.sub(r'(<div class="tip">)(?:🌱|🌳|💡)\s*', lambda m: m.group(1) + I.html('lightbulb') + ' ', html)
-    for e, n in ICON_MAP.items():
-        html = html.replace(e, I.html(n))
+    html = re.sub(r'(<div class="tip">)(?:🌱|🌳|💡)\s*', lambda m: m.group(1), html)
+    for e in ICON_MAP_OLD:
+        html = html.replace(e + ' ', '').replace(e, '')
     return EMOJI_RE.sub('', html)   # any other emoji left in running text is dropped (figures use vector icons only)
 
 # ------------------------------------------------------------------ tone: a more mature, academic register
@@ -60,10 +61,10 @@ def tone(html):
         words = title.split(' '); words[-1] = '<b>' + words[-1] + '</b>'
         return f'<div class="lh"><div class="lno">{label}</div><div class="lt">{" ".join(words)}</div><div class="lu">{unit}</div></div>'
     html = re.sub(r'<div class="lh"[^>]*><div class="ln"[^>]*>([^<]+)</div><div><div class="lt">([^<]+)</div><div class="ls">([^<]+)</div></div></div>', lh, html)
-    rows = {'u1': ['earth', 'trees', 'building-2'], 'u2': ['bug', 'leaf', 'fish'], 'u3': ['mountain', 'sprout', 'tractor']}
+    rows = {'u1': ['globe', 'tree', 'houses'], 'u2': ['cow', 'bee', 'seedling'], 'u3': ['rock', 'seedling', 'tractor']}
     for u, names in rows.items():
         html = re.sub(r'(<div class="unitopen %s">.*?)<div class="big">[^<]*</div>' % u,
-                      lambda m, n=names: m.group(1) + '<div class="uicons">' + ''.join(f'<span class="uic">{I.html(x, "ui")}</span>' for x in n) + '</div>', html, count=1, flags=re.S)
+                      lambda m, n=names: m.group(1) + '<div class="uicons">' + ''.join(f'<span class="uic">{P.html(x, "upic")}</span>' for x in n) + '</div>', html, count=1, flags=re.S)
     html = re.sub(r'<h1>([^<]+)</h1>', lambda m: '<h1>' + ' '.join(m.group(1).split(' ')[:-1]) + ' <b>' + m.group(1).split(' ')[-1] + '</b></h1>', html)
     return html
 
@@ -129,7 +130,7 @@ def render_q(q, n, student=True):
     return ''
 
 def render_activity(a):
-    s = f'<div class="act"><div class="act-t">{I.html("pencil")} {a["title"]}</div><p>{a["text"]}</p>'
+    s = f'<div class="act"><div class="act-t">{a["title"]}</div><p>{a["text"]}</p>'
     k = a['kind']
     if k == 'classify':
         s += table_classify(a['cols'], a['rows'], True, group=a.get('with_group', False), multi=a.get('multi', False))
@@ -165,7 +166,7 @@ def render_activity_key(a):
 
 def assess_student(n):
     d = LQ[n]
-    s = f'<div class="assess"><h3>{I.html("circle-check")} تقويم الدرس</h3>' + render_activity(d['activity'])
+    s = f'<div class="assess"><h3>تقويم الدرس</h3>' + render_activity(d['activity'])
     for i, q in enumerate(d['qs']): s += render_q(q, i + 1, True)
     return s + '</div>'
 
@@ -194,22 +195,22 @@ T, N, G = S.TEAL, S.NAVY, S.SOFT
 def mk_svgs():
     D = {'COVER': COV.cover_svg(), 'ENV': S.env_panorama()}
     D['TREE_WL'] = S.tree('البيئة', [('بيئة مائية', N, 'waves', ['مياه مالحة: البحار', 'مياه عذبة: الأنهار']), ('بيئة يابسة', T, 'mountain', ['الصحاري', 'الغابات', 'المزارع'])], N)
-    D['TREE_LN'] = S.tree('مكوّنات البيئة', [('مكوّنات حية', T, 'leaf', ['الإنسان', 'الحيوان', 'النبات']), ('مكوّنات غير حية', G, 'droplets', ['الماء', 'الهواء', 'اليابسة'])], N)
+    D['TREE_LN'] = S.tree('مكوّنات البيئة', [('مكوّنات حية', T, 'seedling', ['الإنسان', 'الحيوان', 'النبات']), ('مكوّنات غير حية', G, 'droplet', ['الماء', 'الهواء', 'اليابسة'])], N)
     D['FOODCHAIN'] = S.flow([dict(e='sprout', t='نبات', s='منتِج', c=T), dict(e='rabbit', t='أرنب', s='مستهلِك (عاشب)', c=N), dict(e='paw-print', t='ثعلب', s='مستهلِك (لاحم)', c=G)])
     D['PLANTNEEDS'] = S.plant_needs()
     D['RES'] = S.tree('موارد البيئة', [('موارد حية', T, 'trees', ['نباتية: الحبوب، القطن، الأخشاب', 'حيوانية: الأبقار، الأغنام، الأسماك']),
                                     ('موارد غير حية', N, 'droplets', ['الماء', 'الهواء', 'اليابسة: التربة والصخور والنفط'])], N)
     D['CLEANPOL'] = S.clean_vs_polluted()
-    D['VERTTREE'] = S.tree('الحيوانات', [('لافقاريات', N, 'bug', ['الإسفنجيات', 'الديدان', 'المفصليات', 'الرخويات', 'شوكيات الجلد']),
+    D['VERTTREE'] = S.tree('الحيوانات', [('لافقاريات', N, 'snail', ['الإسفنجيات', 'الديدان', 'المفصليات', 'الرخويات', 'شوكيات الجلد']),
                                       ('فقاريات', T, 'bone', ['الثدييات', 'الطيور', 'الزواحف', 'البرمائيات', 'الأسماك'])], N)
     D['INSECT'] = S.insect(); D['PLANT'] = S.plant(); D['SEEDS'] = S.seeds()
     D['PLANTTREE'] = S.tree('النباتات', [('حسب مكان العيش', N, 'map-pin', ['مائية: عذبة / مالحة', 'يابسة: غابات / صحارى']),
                                       ('حسب البذور', T, 'sprout', ['بذرية', 'لا بذرية']), ('حسب الأزهار', G, 'flower', ['زهرية', 'لازهرية'])], N)
     D['EARTH'] = S.earth()
-    D['ROCKS1'] = S.flow([dict(e='flame', t='مواد منصهرة', c=N), dict(e='snowflake', t='تبرد وتتصلّب', c=T), dict(e='mountain', t='صخر ناري', s='مثال: الجرانيت', c=G)], H=190)
-    D['ROCKS2'] = S.flow([dict(e='waves', t='فتات ورواسب', c=N), dict(e='layers', t='تراكم والتحام', c=T), dict(e='mountain', t='صخر رسوبي', s='مثال: الحجر الجيري', c=G)], H=190)
-    D['ROCKS3'] = S.flow([dict(e='mountain', t='صخر سابق', c=N), dict(e='flame', t='حرارة وضغط', c=T), dict(e='gem', t='صخر متحوّل', s='مثال: الرخام', c=G)], H=190)
-    D['ERODE'] = S.flow([dict(e='wind', t='تفتيت', s='الرياح والمياه تفتّت الصخور', c=N), dict(e='truck', t='نقل', s='تنقل الفتات', c=T), dict(e='mountain', t='ترسيب', s='يترسّب حين تقلّ السرعة', c=G)], H=215)
+    D['ROCKS1'] = S.flow([dict(e='volcano', t='مواد منصهرة', c=N), dict(e='snowflake', t='تبرد وتتصلّب', c=T), dict(e='rock', t='صخر ناري', s='مثال: الجرانيت', c=G)], H=190)
+    D['ROCKS2'] = S.flow([dict(e='wave', t='فتات ورواسب', c=N), dict(e='brick', t='تراكم والتحام', c=T), dict(e='rock', t='صخر رسوبي', s='مثال: الحجر الجيري', c=G)], H=190)
+    D['ROCKS3'] = S.flow([dict(e='rock', t='صخر سابق', c=N), dict(e='fire', t='حرارة وضغط', c=T), dict(e='gem', t='صخر متحوّل', s='مثال: الرخام', c=G)], H=190)
+    D['ERODE'] = S.flow([dict(e='wind', t='تفتيت', s='الرياح والمياه تفتّت الصخور', c=N), dict(e='truck', t='نقل', s='تنقل الفتات', c=T), dict(e='desert', t='ترسيب', s='يترسّب حين تقلّ السرعة', c=G)], H=215)
     D['DUNES'] = S.dunes(); D['SOIL'] = S.soil(); D['DESERT'] = S.desertification()
     D['DESERTFLOW'] = S.flow([dict(e='triangle-alert', t='المشكلة', s='التصحّر', c=N), dict(e='wind', t='أسبابه', s='رمال، رياح، جفاف، حرارة', c=T), dict(e='sprout', t='وسائل الحدّ منه', s='حلول متعدّدة', c=G)], H=215)
     return D
@@ -217,31 +218,32 @@ def mk_svgs():
 def icon_cards(items, cols=3):
     s = f'<div class="ec" style="grid-template-columns:repeat({cols},1fr)">'
     for names, t, d in items:
-        s += '<div class="ecard"><div class="ico">' + ''.join(I.html(n, 'ci') for n in names.split()) + f'</div><b>{t}</b><br><span>{d}</span></div>'
+        ns = names.split(); cls = 'pic' if len(ns) == 1 else 'pic sm'
+        s += '<div class="ecard"><div class="ico">' + ''.join(P.html(n, cls) for n in ns) + f'</div><b>{t}</b><br><span>{d}</span></div>'
     return s + '</div>'
 
 CARDS = {
  'ANIM': icon_cards([
-    ('paw-print', 'الثدييات', 'ترضع صغارها الحليب. يغطي أجسام كثير منها الشعر أو الصوف.'),
-    ('bird', 'الطيور', 'يغطي أجسامها الريش، ولها مناقير، وتتكاثر بالبيض. منها ما يطير ومنها ما لا يطير.'),
-    ('turtle', 'الزواحف', 'يغطي أجسام كثير منها حراشف، وتتكاثر بالبيض. بعضها يزحف لقصر أطرافه أو لعدم وجودها.'),
-    ('waves', 'البرمائيات', 'تقضي جزءًا من حياتها في الماء وجزءًا على اليابسة. جلد الضفدع رطب، وله أطراف تساعده على السباحة، ويتكاثر بالبيض.'),
-    ('fish', 'الأسماك', 'تعيش في الماء، وتتنفّس بالخياشيم، ولها زعانف تساعدها على الحركة، ويغطي أجسام كثير منها القشور.'),
-    ('bug snail', 'اللافقاريات', 'ليس لها عمود فقري؛ منها الإسفنجيات والديدان والمفصليات (ومنها الحشرات) والرخويات وشوكيات الجلد.')], 3),
+    ('cow sheep camel', 'الثدييات', 'ترضع صغارها الحليب. يغطي أجسام كثير منها الشعر أو الصوف.'),
+    ('chicken eagle', 'الطيور', 'يغطي أجسامها الريش، ولها مناقير، وتتكاثر بالبيض. منها ما يطير ومنها ما لا يطير.'),
+    ('snake turtle crocodile', 'الزواحف', 'يغطي أجسام كثير منها حراشف، وتتكاثر بالبيض. بعضها يزحف لقصر أطرافه أو لعدم وجودها.'),
+    ('frog', 'البرمائيات', 'تقضي جزءًا من حياتها في الماء وجزءًا على اليابسة. جلد الضفدع رطب، وله أطراف تساعده على السباحة، ويتكاثر بالبيض.'),
+    ('fish tropfish', 'الأسماك', 'تعيش في الماء، وتتنفّس بالخياشيم، ولها زعانف تساعدها على الحركة، ويغطي أجسام كثير منها القشور.'),
+    ('snail octopus crab', 'اللافقاريات', 'ليس لها عمود فقري؛ منها الإسفنجيات والديدان والمفصليات (ومنها الحشرات) والرخويات وشوكيات الجلد.')], 3),
  'INSECTS': icon_cards([
-    ('flower-2', 'النحل', 'نافع: يلقّح الأزهار وينتج العسل.'), ('worm', 'دودة القزّ', 'نافعة: تعطينا الحرير.'),
-    ('bug', 'الذباب', 'ضارّ: قد ينقل الأمراض.'), ('bug', 'البعوض', 'ضارّ: قد ينقل الأمراض.'), ('wheat', 'الجراد', 'ضارّ: يتلف المحاصيل.')], 5),
+    ('bee', 'النحل', 'نافع: يلقّح الأزهار وينتج العسل.'), ('caterpillar', 'دودة القزّ', 'نافعة: تعطينا الحرير.'),
+    ('fly', 'الذباب', 'ضارّ: قد ينقل الأمراض.'), ('mosquito', 'البعوض', 'ضارّ: قد ينقل الأمراض.'), ('cricket', 'الجراد', 'ضارّ: يتلف المحاصيل.')], 5),
  'RESCARDS': icon_cards([
-    ('wheat', 'الحبوب', 'غذاء'), ('shirt', 'القطن', 'ملابس'), ('tree-deciduous', 'الأخشاب', 'أثاث وبناء'), ('leaf', 'المطاط', 'أدوات وإطارات'),
-    ('milk', 'الأبقار', 'لحم وحليب'), ('paw-print', 'الأغنام', 'لحم وصوف'), ('footprints', 'الجمال', 'نقل وحمل الأمتعة'), ('egg', 'الدجاج', 'لحم وبيض'),
-    ('fish', 'الأسماك', 'غذاء'), ('droplets', 'الماء', 'شرب وغسل وري'), ('mountain', 'الصخور', 'بناء وصناعة'), ('fuel', 'النفط والغاز', 'وقود')], 6),
- 'POLL': icon_cards([('factory', 'تلوّث الهواء', 'الغبار والدخان واحتراق الوقود.'), ('droplets', 'تلوّث الماء', 'مخلّفات المصانع ومياه المجاري وتسرّب النفط.'),
-    ('trash-2', 'تلوّث اليابسة', 'تراكم النفايات والقمامة.'), ('volume-2', 'الضوضاء', 'أصوات مرتفعة مزعجة: المنبّهات والآلات والمركبات.')], 4),
+    ('wheat', 'الحبوب', 'غذاء'), ('tshirt', 'القطن', 'ملابس'), ('pine', 'الأخشاب', 'أثاث وبناء'), ('leaf', 'المطاط', 'أدوات وإطارات'),
+    ('cow', 'الأبقار', 'لحم وحليب'), ('sheep', 'الأغنام', 'لحم وصوف'), ('camel', 'الجمال', 'نقل وحمل الأمتعة'), ('chicken', 'الدجاج', 'لحم وبيض'),
+    ('fish', 'الأسماك', 'غذاء'), ('droplet', 'الماء', 'شرب وغسل وري'), ('rock', 'الصخور', 'بناء وصناعة'), ('oildrum', 'النفط والغاز', 'وقود')], 6),
+ 'POLL': icon_cards([('factory', 'تلوّث الهواء', 'الغبار والدخان واحتراق الوقود.'), ('oildrum droplet', 'تلوّث الماء', 'مخلّفات المصانع ومياه المجاري وتسرّب النفط.'),
+    ('bin', 'تلوّث اليابسة', 'تراكم النفايات والقمامة.'), ('speaker', 'الضوضاء', 'أصوات مرتفعة مزعجة: المنبّهات والآلات والمركبات.')], 4),
  'SOLUTIONS': icon_cards([
-    ('sprout', 'زراعة الأراضي الصالحة', 'نزرع الأراضي الصالحة ونحسّنها.'), ('trees', 'مصدّات الرياح', 'أحزمة من الأشجار حول الحقول.'),
-    ('shovel', 'السماد والدبال', 'نضيف الدبال أو السماد الطبيعي أو الحيواني، ونستخدم الأسمدة المناسبة.'), ('droplet', 'توفير مياه الري', 'نحفر الآبار عند الحاجة، ونستخدم الري الحديث كالتنقيط.'),
-    ('sun', 'نباتات تتحمّل الجفاف', 'نزرع نباتات تتحمّل الجفاف والحرارة.'), ('droplets', 'غسل التربة المالحة', 'عند الحاجة وبالطريقة المناسبة.'),
-    ('house', 'الزراعة المحمية', 'في الظروف المناسبة.'), ('recycle', 'الدورة الزراعية', 'زراعة البقوليات أو البرسيم وفق خطة زراعية.')], 4),
+    ('seedling', 'زراعة الأراضي الصالحة', 'نزرع الأراضي الصالحة ونحسّنها.'), ('pine tree', 'مصدّات الرياح', 'أحزمة من الأشجار حول الحقول.'),
+    ('potted', 'السماد والدبال', 'نضيف الدبال أو السماد الطبيعي أو الحيواني، ونستخدم الأسمدة المناسبة.'), ('droplet', 'توفير مياه الري', 'نحفر الآبار عند الحاجة، ونستخدم الري الحديث كالتنقيط.'),
+    ('cactus', 'نباتات تتحمّل الجفاف', 'نزرع نباتات تتحمّل الجفاف والحرارة.'), ('wave', 'غسل التربة المالحة', 'عند الحاجة وبالطريقة المناسبة.'),
+    ('housegarden', 'الزراعة المحمية', 'في الظروف المناسبة.'), ('recycle', 'الدورة الزراعية', 'زراعة البقوليات أو البرسيم وفق خطة زراعية.')], 4),
 }
 
 # ------------------------------------------------------------------ assemble
@@ -251,7 +253,7 @@ def build_book(pages=None):
     css = load('book.css')
     body = load('front.html') + load('unit1.html') + load('unit2.html') + load('unit3.html') + load('back.html')
     body = tone(body)
-    body = re.sub(r'\{\{IC:([\w-]+)\}\}', lambda m: I.html(m.group(1)), body)
+    body = re.sub(r'\{\{IC:([\w-]+)\}\}', '', body)
     for k, v in mk_svgs().items(): body = body.replace('{{SVG_' + k + '}}', v)
     for k, v in CARDS.items(): body = body.replace('{{CARDS_' + k + '}}', v)
     for n in LQ: body = body.replace('{{ASSESS_%d}}' % n, assess_student(n))
@@ -268,7 +270,7 @@ REVIEW_LIST = [
  ('تسمية المستوى', 'كُتب على الغلاف «السنة الثانية» بطلب المركز. محتوى الكتاب مبني على وثيقة تنقية كتاب العلوم للصف الرابع الابتدائي؛ فليُراجَع مستوى الصياغة والأسئلة بما يناسب طلاب السنة الثانية.'),
  ('الخط', 'استُعمل خط «ثمانية» (Thmanyah Sans) من مستودع موقع البركة. تُراجَع رخصة الخط قبل النشر العام.'),
  ('الشعار والهوية', 'الشعار الرسمي والشعار المختصر وألوان الهوية (البترولي والأزرق الداكن) من مستودع منصة المعرفة. اسم الجهة في الشعار «للتأصيل الشرعي» بينما يظهر في بعض ملفات الهوية الأخرى «للتأصيل العلمي»؛ يؤكَّد الاسم المعتمد.'),
- ('الرسوم والأيقونات', 'الرسوم متجهة بسيطة بألوان الهوية، والأيقونات من مكتبة Lucide (رخصة ISC). تُستبدل بصور واقعية أو رسوم علمية دقيقة إن رغب المركز.'),
+ ('الرسوم والصور', 'الأشكال البيانية رسوم متجهة بألوان الهوية. أما رسومات الكائنات والمشاهد (البطاقات واللوحات وصفحات افتتاح الوحدات والغلاف) فمن مجموعة Fluent Emoji من Microsoft (نمط Color، رخصة MIT، ونصّ الرخصة في assets/pics). لم يتيسر الوصول إلى مكتبات الصور الفوتوغرافية، فهي رسومات توضيحية وليست صورًا حقيقية؛ وتُستبدل بصور واقعية أو رسوم علمية دقيقة إن رغب المركز. حُذفت الأيقونات الخطية من عناوين الأقسام (الأهداف والمصطلحات والخلاصة والتقويم) لتبقى نصية.'),
  ('آيات قرآنية', 'أُضيفت ثلاث آيات موجزة في افتتاح الوحدات (الأنعام: 99، النور: 45، الرعد: 3) لأن نص الكتاب الأصلي لم يكن متاحًا. تُراجَع كتابتها وضبطها ومراجعها.'),
  ('أمثلة اللافقاريات', 'ذُكرت المجموعات كما في الوثيقة، وأُضيفت أيقونات توضيحية (حشرة، حلزون) من خارج المصدر، وتحتاج موافقة المؤلف.'),
  ('تصنيف النباتات اللازهرية', 'ذكرت الوثيقة الطحالب والحزازيات والسرخسيات ضمن النباتات اللازهرية مع التنبيه على ضبط المصطلحات. وردت كما هي مع عبارة «من أمثلتها» وتحتاج مراجعة علمية.'),

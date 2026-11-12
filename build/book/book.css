@@ -46,7 +46,7 @@ svg.ui { width: 46px; height: 46px; }
 .unitopen .un { display: block; color: var(--c); font-size: 15pt; font-weight: 700; }
 .unitopen h1 { font-size: 44pt; font-weight: 300; color: var(--cd); margin: 4px 0 6px; line-height: 1.35; } .unitopen h1 b { font-weight: 900; }
 .unitopen::after { content: ""; display: block; width: 60mm; height: 3px; background: var(--c); margin: 6px 0 16px; }
-.uicons { display: flex; gap: 14px; margin: 10px 0 20px; } .uic { width: 76px; height: 76px; border-radius: 50%; background: var(--cl); color: var(--c); display: flex; align-items: center; justify-content: center; }
+.uicons { display: flex; gap: 14px; margin: 10px 0 20px; } .uic { width: 92px; height: 92px; border-radius: 50%; background: var(--cl); display: flex; align-items: center; justify-content: center; }
 .unitopen .ayah-box { margin: 10px 0 18px; padding: 6px 16px; border-inline-start: 3px solid var(--c); background: var(--cl); font-size: 14.5pt; line-height: 2; }
 .unitopen .goals { border: 0; background: transparent; padding: 0; } .unitopen .goals h4 { font-size: 14pt; color: var(--cd); margin-bottom: 4px; } .unitopen ul { font-size: 13pt; }
 .ayah { color: #0a5f6a; font-weight: 700; } .cite { color: #5d656e; font-size: 10.5pt; font-weight: 400; }
@@ -82,7 +82,9 @@ td.rt { text-align: start; } tr { page-break-inside: avoid; }
 table:not(.gl):not(.toc) { page-break-inside: avoid; break-inside: avoid; }
 .ec { display: grid; gap: 8px; margin: 8px 0; }
 .ecard { border: 1px solid #d4cdc9; border-top: 3px solid var(--c); background: #fff; text-align: center; padding: 6px 8px 6px; line-height: 1.55; font-size: 11pt; page-break-inside: avoid; border-radius: 2px; }
-.ecard .ico { width: 100%; height: 40px; display: flex; align-items: center; justify-content: center; color: var(--c); margin-bottom: 2px; } .ecard span { color: #5d656e; font-size: 10pt; }
+.ecard .ico { width: 100%; height: 64px; display: flex; align-items: center; justify-content: center; gap: 4px; margin-bottom: 2px; }
+.ecard img.pic { height: 58px; width: auto; } .ecard img.pic.sm { height: 44px; }
+img.upic { width: 58px; height: 58px; } .ecard span { color: #5d656e; font-size: 10pt; }
 
 /* assessment */
 .assess { border-top: 1px solid #cfc8c3; margin-top: 16px; padding-top: 2px; }

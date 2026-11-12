@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Full-page cover (A4 ratio): layered landscape in the Knowledge Center palette, official white lockup, Lucide icons."""
 import os, math, random, base64
-import icons as I
+import pics as I
 
 B = os.path.dirname(os.path.abspath(__file__))
 
@@ -55,9 +55,9 @@ def cover_svg():
     s += '<line x1="297" y1="400" x2="497" y2="400" stroke="#98babd" stroke-width="2"/>'
     s += t(397, 462, 'السنة الثانية', 46, '#fff', 700)
     s += t(397, 506, 'الفصل الدراسي الأول', 28, '#d2e3e5', 300)
-    for i, n in enumerate(['leaf', 'droplets', 'mountain', 'bug', 'wheat']):
+    for i, n in enumerate(['seedling', 'droplet', 'snowmtn', 'bee', 'wheat']):
         cx = 397 + (i - 2) * 94 - 40
-        s += f'<circle cx="{cx}" cy="620" r="34" fill="#032a45" opacity=".4" stroke="#d2e3e5" stroke-width="1.6"/>' + I.nested(n, cx, 620, 34, '#f3eeec', 1.6)
+        s += f'<circle cx="{cx}" cy="620" r="36" fill="#f3eeec" opacity=".92" stroke="#d2e3e5" stroke-width="1.6"/>' + I.nested(n, cx, 620, 48)
     s += '<rect x="48" y="1044" width="698" height="58" rx="10" fill="#032a45" opacity=".78" stroke="#98babd" stroke-width="1.4"/>'
     s += t(397, 1081, 'اسم الطالب: ..........................................   الفوج: ............', 21, '#f3eeec', 400)
     return s + '</svg>'

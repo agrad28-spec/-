@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Sober vector figures in the Knowledge Center palette. Text uses text-anchor=middle only (safe in RTL). Icons: Lucide."""
 import math, random
-import icons as I
+import pics as I
 
 TEAL, NAVY, TEAL4, TEAL2, TEAL1, TEAL0 = '#0a5f6a', '#054473', '#3e8086', '#98babd', '#d2e3e5', '#e8f1f2'
 CANVAS, MUTED, LINE, INK, SOFT, FAINT = '#f3eeec', '#eeeded', '#e7e2df', '#303336', '#5d656e', '#8a9199'
@@ -35,7 +35,7 @@ def tree(root, children, color=TEAL, W=900):
         s += f'<path d="M{W/2} 66 V92 H{cx} V108" fill="none" stroke="{c}" stroke-width="2.5"/>'
         s += f'<rect x="{x:.0f}" y="108" width="{cw:.0f}" height="62" rx="8" fill="{c}"/>'
         s += _t(cx, 148, title, 22, '#fff', True)
-        if ico: s += I.nested(ico, x + cw - 26, 139, 26, '#fff')
+        if ico: s += f'<circle cx="{x+cw-30:.0f}" cy="139" r="21" fill="#fff"/>' + I.nested(ico, x + cw - 30, 139, 32)
         for j, sub in enumerate(subs):
             y = 196 + j * 42
             s += f'<rect x="{x+10:.0f}" y="{y-17}" width="{cw-20:.0f}" height="34" rx="6" fill="#fff" stroke="{c}" stroke-width="1.6"/>'
@@ -52,7 +52,7 @@ def flow(steps, W=900, H=210, color=TEAL, arrow=NAVY):
         c = st.get('c', color); f = st.get('f', TEAL0)
         s += f'<rect x="{x:.0f}" y="16" width="{bw:.0f}" height="{H-32}" rx="10" fill="{f}" stroke="{c}" stroke-width="2"/>'
         s += f'<circle cx="{x+bw/2:.0f}" cy="68" r="34" fill="#fff" stroke="{c}" stroke-width="1.6"/>'
-        s += I.nested(st.get('e', 'leaf'), x + bw / 2, 68, 38, c)
+        s += I.nested(st.get('e', 'leaf'), x + bw / 2, 68, 56)
         s += _t(x + bw / 2, 132, st['t'], 21, INK, True)
         if st.get('s'): s += _t(x + bw / 2, 160, st['s'], 15, SOFT)
         if i < n - 1:
@@ -62,16 +62,16 @@ def flow(steps, W=900, H=210, color=TEAL, arrow=NAVY):
 # ---------------------------------------------------------------- environment panorama (six panels with icons)
 def env_panorama():
     W, H = 900, 330
-    zones = [('بحر', '#cfe0ee', NAVY, ['waves', 'fish']), ('نهر', '#dbe9f1', NAVY, ['droplets', 'bird']),
-             ('غابة', TEAL1, TEAL, ['trees', 'leaf']), ('صحراء', '#ece3d2', '#7a6a4a', ['sun', 'mountain']),
-             ('مزرعة', TEAL0, TEAL, ['wheat', 'tractor']), ('مدينة', MUTED, SOFT, ['building-2', 'school'])]
+    zones = [('بحر', '#cfe0ee', NAVY, ['wave', 'fish']), ('نهر', '#dbe9f1', NAVY, ['nationalpark', 'bird']),
+             ('غابة', TEAL1, TEAL, ['tree', 'pine']), ('صحراء', '#ece3d2', '#7a6a4a', ['desert', 'camel']),
+             ('مزرعة', TEAL0, TEAL, ['wheat', 'tractor']), ('مدينة', MUTED, SOFT, ['office', 'houses'])]
     s = f'<rect width="{W}" height="{H}" rx="10" fill="#fff" stroke="{LINE}" stroke-width="1.5"/>'
     zw = (W - 20) / 6
     for i, (n, bg, c, ics) in enumerate(zones):
         x = W - 10 - zw * (i + 1)
         s += f'<rect x="{x+3:.0f}" y="64" width="{zw-6:.0f}" height="212" rx="8" fill="{bg}"/>'
-        s += I.nested(ics[0], x + zw / 2, 130, 62, c, 1.5)
-        s += I.nested(ics[1], x + zw / 2, 208, 40, c, 1.5)
+        s += I.nested(ics[0], x + zw / 2, 128, 86)
+        s += I.nested(ics[1], x + zw / 2, 214, 58)
         s += _pill(x + zw / 2, 300, zw - 14, n, '#fff', c, 19, INK)
     def br(i0, i1, label, col):
         xr = W - 10 - zw * i0 - 3; xl = W - 10 - zw * (i1 + 1) + 3
