@@ -1,3 +1,4 @@
 __pycache__/
 *.pyc
-build/book/assets/
+build/book/assets/*.png
+build/book/assets/footer_emblem.svg

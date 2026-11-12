@@ -1,0 +1,1 @@
+lucide-static icons are ISC licensed (https://github.com/lucide-icons/lucide)

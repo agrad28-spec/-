@@ -1,89 +1,63 @@
 # -*- coding: utf-8 -*-
-"""Full-page illustrated cover (A4 ratio) with optional logo slots (assets/logo_right.* , assets/logo_left.*)."""
-import os, math, random, base64, glob
+"""Full-page cover (A4 ratio): layered landscape in the Knowledge Center palette, official white lockup, Lucide icons."""
+import os, math, random, base64
+import icons as I
 
 B = os.path.dirname(os.path.abspath(__file__))
 
-def _logo(name):
-    for ext in ('png', 'svg', 'jpg', 'jpeg', 'webp'):
-        p = os.path.join(B, 'assets', f'{name}.{ext}')
-        if os.path.exists(p):
-            mime = {'png': 'image/png', 'svg': 'image/svg+xml', 'jpg': 'image/jpeg', 'jpeg': 'image/jpeg', 'webp': 'image/webp'}[ext]
-            return f'data:{mime};base64,' + base64.b64encode(open(p, 'rb').read()).decode()
-    return None
+def _img(name):
+    p = os.path.join(B, 'assets', name)
+    if not os.path.exists(p): return None
+    return 'data:image/png;base64,' + base64.b64encode(open(p, 'rb').read()).decode()
 
-def t(x, y, s, size, fill='#222', bold=False, extra=''):
-    return f'<text x="{x}" y="{y}" font-size="{size}" fill="{fill}" text-anchor="middle"{" font-weight=\"700\"" if bold else ""} {extra}>{s}</text>'
+def t(x, y, s, size, fill='#fff', w=700, op=1):
+    return f'<text x="{x}" y="{y}" font-size="{size}" fill="{fill}" text-anchor="middle" font-weight="{w}" opacity="{op}">{s}</text>'
 
 def cover_svg():
     W, H = 794, 1123
-    random.seed(21)
+    random.seed(7)
     s = (f'<svg viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"><defs>'
-         '<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2f8fe0"/><stop offset=".45" stop-color="#8fd0ff"/><stop offset=".8" stop-color="#fff1c7"/></linearGradient>'
-         '<radialGradient id="sunG"><stop offset="0" stop-color="#fff7c2"/><stop offset=".55" stop-color="#ffd43b"/><stop offset="1" stop-color="#ffa94d"/></radialGradient>'
-         '<linearGradient id="riv" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7cc7ff"/><stop offset="1" stop-color="#2d7fd4"/></linearGradient>'
-         '<linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8ad66e"/><stop offset="1" stop-color="#4aa84c"/></linearGradient>'
-         '<linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5fbf5a"/><stop offset="1" stop-color="#2f8a3c"/></linearGradient>'
+         '<linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#032a45"/><stop offset=".42" stop-color="#054473"/><stop offset=".72" stop-color="#0a5f6a"/><stop offset="1" stop-color="#063a41"/></linearGradient>'
+         '<radialGradient id="sun" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff"/><stop offset=".62" stop-color="#f3eeec"/><stop offset="1" stop-color="#d2e3e5"/></radialGradient>'
+         '<linearGradient id="m1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3e8086" stop-opacity=".95"/><stop offset="1" stop-color="#0a5f6a"/></linearGradient>'
+         '<linearGradient id="m2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b6974"/><stop offset="1" stop-color="#084c55"/></linearGradient>'
+         '<linearGradient id="m3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a5f6a"/><stop offset="1" stop-color="#063a41"/></linearGradient>'
          '</defs>')
-    s += f'<rect width="{W}" height="{H}" fill="url(#sky)"/>'
-    # sun + rays
-    sx, sy = 650, 215
-    for i in range(24):
-        a = math.radians(i * 15)
-        s += f'<line x1="{sx+92*math.cos(a):.0f}" y1="{sy+92*math.sin(a):.0f}" x2="{sx+(150 if i%2 else 130)*math.cos(a):.0f}" y2="{sy+(150 if i%2 else 130)*math.sin(a):.0f}" stroke="#ffe066" stroke-width="7" stroke-linecap="round" opacity=".75"/>'
-    s += f'<circle cx="{sx}" cy="{sy}" r="120" fill="#fff3b0" opacity=".35"/><circle cx="{sx}" cy="{sy}" r="78" fill="url(#sunG)"/>'
-    # stars-ish sparkles at top and clouds
-    for _ in range(30):
-        s += f'<circle cx="{random.uniform(0,W):.0f}" cy="{random.uniform(0,330):.0f}" r="{random.uniform(1,2.6):.1f}" fill="#fff" opacity=".55"/>'
-    for cx, cy, sc in [(120, 430, 1.1), (420, 395, .9), (700, 470, .8)]:
-        s += (f'<g fill="#fff" opacity=".93"><ellipse cx="{cx}" cy="{cy}" rx="{80*sc:.0f}" ry="{28*sc:.0f}"/><ellipse cx="{cx-40*sc:.0f}" cy="{cy+8*sc:.0f}" rx="{46*sc:.0f}" ry="{22*sc:.0f}"/>'
-              f'<ellipse cx="{cx+46*sc:.0f}" cy="{cy+10*sc:.0f}" rx="{52*sc:.0f}" ry="{22*sc:.0f}"/></g>')
-    # mountains
-    s += '<path d="M0 700 L110 590 L200 660 L330 540 L450 665 L575 575 L690 670 L794 610 V820 H0Z" fill="#9db6e8"/>'
-    s += '<path d="M330 540 L300 575 L330 565 L355 578Z M110 590 L90 612 L112 604 L130 616Z M575 575 L550 605 L575 596 L598 610Z" fill="#fff" opacity=".9"/>'
-    s += '<path d="M0 760 Q140 670 300 740 T600 720 T794 735 V900 H0Z" fill="#7fd06b"/>'
-    s += '<path d="M0 840 Q220 760 430 835 T794 815 V1123 H0Z" fill="url(#g1)"/>'
-    # river
-    s += '<path d="M330 1123 C300 1010 520 985 470 905 C430 845 505 800 540 765 L580 770 C545 815 485 850 530 905 C590 985 430 1030 520 1123Z" fill="url(#riv)"/>'
-    for (x1, y1, x2, y2) in [(430, 1060, 480, 1048), (470, 985, 520, 975), (500, 925, 540, 915), (520, 880, 548, 872)]:
-        s += f'<path d="M{x1} {y1} q15 -10 30 0 t30 0" stroke="#fff" stroke-width="3.5" fill="none" opacity=".85"/>'
-    s += '<path d="M0 960 Q200 905 340 975 L330 1123 H0Z" fill="url(#g2)"/><path d="M794 950 Q640 900 560 985 L520 1123 H794Z" fill="url(#g2)"/>'
-    # flowers
-    cols = ['#ff6b8a', '#ffd43b', '#fff', '#ff922b', '#b197fc']
-    for _ in range(150):
-        x = random.uniform(0, W); y = random.uniform(900, 1123)
-        if 330 < x < 560 and y > 900:  # river zone approx
-            continue
-        s += f'<circle cx="{x:.0f}" cy="{y:.0f}" r="{random.uniform(2.5,5):.1f}" fill="{random.choice(cols)}"/>'
-    # emoji scene
-    for e, x, y, fs in [('🌳', 105, 835, 170), ('🌴', 705, 800, 150), ('🌳', 635, 860, 110), ('🐄', 190, 990, 105), ('🐑', 285, 1040, 80), ('🚜', 650, 975, 105),
-                        ('🪨', 95, 1075, 85), ('🌾', 720, 1050, 90), ('🌱', 610, 1075, 70), ('🦋', 165, 700, 58), ('🐝', 590, 705, 50), ('🐦', 290, 610, 52), ('🐦', 340, 585, 38), ('🐟', 505, 985, 42), ('💧', 395, 905, 40)]:
-        s += t(x, y, e, fs)
-    # top bar: official lockup (right) + grade (left)
-    lk = _logo('lockup')
-    s += '<rect x="30" y="26" width="734" height="112" rx="26" fill="#fff" opacity=".97" stroke="#0a5f6a" stroke-width="3"/>'
-    s += '<line x1="480" y1="46" x2="480" y2="118" stroke="#d4cdc9" stroke-width="2"/>'
-    s += t(255, 76, 'الصف الرابع الابتدائي', 36, '#054473', True) + t(255, 114, 'الفصل الدراسي الأول', 25, '#0a5f6a', True)
-    if lk: s += f'<image href="{lk}" x="498" y="38" width="248" height="88" preserveAspectRatio="xMidYMid meet"/>'
-    # ribbon title
-    s += '<path d="M60 262 L110 302 L110 342 L60 342 L90 302Z" fill="#054473"/><path d="M734 262 L684 302 L684 342 L734 342 L704 302Z" fill="#054473"/>'
-    s += '<rect x="106" y="190" width="586" height="170" rx="40" fill="#054473" opacity=".25" transform="translate(7 9)"/>'
-    s += '<rect x="106" y="190" width="586" height="170" rx="40" fill="#fff" stroke="#054473" stroke-width="7"/>'
-    s += '<rect x="122" y="206" width="554" height="138" rx="28" fill="none" stroke="#0a5f6a" stroke-width="2.5"/>'
-    s += t(397, 310, 'العلوم', 138, '#054473', True)
-    # unit medallions
-    units = [('🌍', ['الإنسان', 'والبيئة'], '#0a5f6a', 600), ('🐝', ['الكائنات', 'الحية'], '#054473', 397), ('🌱', ['الأرض والتربة', 'والزراعة'], '#5d656e', 194)]
-    for e, lines, c, x in units:
-        s += f'<circle cx="{x}" cy="500" r="66" fill="#000" opacity=".12" transform="translate(4 6)"/><circle cx="{x}" cy="500" r="66" fill="#fff" stroke="{c}" stroke-width="8"/>'
-        s += t(x, 523, e, 66)
-        w = 28 + max(len(l) for l in lines) * 12.5
-        h = 16 + 27 * len(lines)
-        s += f'<rect x="{x-w/2:.0f}" y="582" width="{w:.0f}" height="{h}" rx="22" fill="{c}"/>'
-        for i, l in enumerate(lines):
-            s += t(x, 610 + i * 27, l, 21, '#fff', True)
-    # bottom band: student name + white emblem
-    em = _logo('emblem-white')
-    s += '<rect x="46" y="1046" width="702" height="62" rx="28" fill="#0a5f6a" stroke="#fff" stroke-width="3"/>'
-    s += t(450, 1086, 'اسم التلميذ: ......................................  الفصل: ..........', 22, '#fff', True)
-    if em: s += f'<image href="{em}" x="70" y="1052" width="76" height="52" preserveAspectRatio="xMidYMid meet"/>'
+    s += f'<rect width="{W}" height="{H}" fill="url(#bg)"/>'
+    for _ in range(70):
+        s += f'<circle cx="{random.uniform(0,W):.0f}" cy="{random.uniform(0,560):.0f}" r="{random.uniform(.6,1.8):.1f}" fill="#fff" opacity="{random.uniform(.25,.7):.2f}"/>'
+    sx, sy = 690, 632
+    for r, o in [(190, .10), (150, .14), (115, .20)]:
+        s += f'<circle cx="{sx}" cy="{sy}" r="{r}" fill="none" stroke="#d2e3e5" stroke-width="1.4" opacity="{o:.2f}"/>'
+    s += f'<circle cx="{sx}" cy="{sy}" r="74" fill="#f3eeec" opacity=".18"/><circle cx="{sx}" cy="{sy}" r="54" fill="url(#sun)"/>'
+    for bx, by, sc in [(610, 560, 1), (650, 535, .75), (575, 530, .6)]:
+        s += f'<path d="M{bx-14*sc} {by} Q{bx-7*sc} {by-9*sc} {bx} {by} Q{bx+7*sc} {by-9*sc} {bx+14*sc} {by}" fill="none" stroke="#d2e3e5" stroke-width="2.4" stroke-linecap="round" opacity=".85"/>'
+    s += '<path d="M0 700 L90 610 L170 665 L290 560 L400 650 L500 600 L610 680 L700 620 L794 690 V900 H0Z" fill="url(#m1)"/>'
+    s += '<path d="M290 560 L262 592 L292 584 L318 596Z M500 600 L478 626 L502 620 L524 630Z M90 610 L72 630 L92 624 L110 634Z" fill="#f3eeec" opacity=".75"/>'
+    s += '<path d="M0 790 Q150 700 330 770 T640 760 T794 780 V960 H0Z" fill="url(#m2)"/>'
+    s += '<path d="M0 880 Q200 800 410 870 T794 850 V1123 H0Z" fill="url(#m3)"/>'
+    s += '<path d="M330 1123 C310 1030 500 1000 450 930 C410 875 480 845 510 805 L546 808 C520 850 470 880 505 930 C560 1010 410 1050 490 1123Z" fill="#98babd" opacity=".55"/>'
+    s += '<path d="M360 1123 C340 1040 520 1010 480 940 C446 886 500 860 522 826" fill="none" stroke="#f3eeec" stroke-width="2" opacity=".5"/>'
+    def pine(x, y, h, c='#042f36'):
+        w = h * .42
+        return (f'<path d="M{x} {y-h} L{x-w*.55} {y-h*.55} L{x-w*.25} {y-h*.55} L{x-w*.8} {y-h*.2} L{x-w*.3} {y-h*.2} L{x-w} {y} L{x+w} {y} L{x+w*.3} {y-h*.2} L{x+w*.8} {y-h*.2} L{x+w*.25} {y-h*.55} L{x+w*.55} {y-h*.55} Z" fill="{c}"/>'
+                f'<rect x="{x-3}" y="{y}" width="6" height="{h*.1}" fill="{c}"/>')
+    for x, y, h in [(70, 960, 190), (140, 990, 140), (30, 1010, 120), (715, 950, 200), (650, 985, 150), (765, 1000, 130), (210, 1010, 90)]:
+        s += pine(x, y, h)
+    for x in range(20, 780, 26):
+        if 300 < x < 540: continue
+        h = random.uniform(40, 80); lean = random.uniform(-6, 6)
+        s += f'<path d="M{x} 1123 Q{x+lean/2:.0f} {1123-h/2:.0f} {x+lean:.0f} {1123-h:.0f}" stroke="#98babd" stroke-width="2" fill="none" opacity=".55" stroke-linecap="round"/>'
+    lk = _img('lockup-white.png')
+    if lk: s += f'<image href="{lk}" x="456" y="48" width="290" height="98" preserveAspectRatio="xMidYMid meet"/>'
+    s += '<line x1="48" y1="168" x2="746" y2="168" stroke="#d2e3e5" stroke-width="1.4" opacity=".6"/>'
+    s += t(397, 360, 'العلوم', 190, '#fff', 900)
+    s += '<line x1="297" y1="400" x2="497" y2="400" stroke="#98babd" stroke-width="2"/>'
+    s += t(397, 462, 'السنة الثانية', 46, '#fff', 700)
+    s += t(397, 506, 'الفصل الدراسي الأول', 28, '#d2e3e5', 300)
+    for i, n in enumerate(['leaf', 'droplets', 'mountain', 'bug', 'wheat']):
+        cx = 397 + (i - 2) * 94 - 40
+        s += f'<circle cx="{cx}" cy="620" r="34" fill="#032a45" opacity=".4" stroke="#d2e3e5" stroke-width="1.6"/>' + I.nested(n, cx, 620, 34, '#f3eeec', 1.6)
+    s += '<rect x="48" y="1044" width="698" height="58" rx="10" fill="#032a45" opacity=".78" stroke="#98babd" stroke-width="1.4"/>'
+    s += t(397, 1081, 'اسم الطالب: ..........................................   الفوج: ............', 21, '#f3eeec', 400)
     return s + '</svg>'
